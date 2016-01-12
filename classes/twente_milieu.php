@@ -45,9 +45,10 @@ class TwenteMilieu {
 
   public function getEvents($from_date) {
     // Do requests for the coming three months
+    $start_month = $from_date->format('m');
     $events = array();
     for( $i = 0; $i < 3; $i++ ) {
-      $from_date->setDate($from_date->format('Y'), $from_date->format('m') + $i, 1);
+      $from_date->setDate($from_date->format('Y'), $start_month + $i, 1);
       $events = array_merge(
         $events,
         $this->parsePage($this->requestPage($from_date), $from_date)
