@@ -2,7 +2,7 @@
 
 class TwenteMilieu {
 
-  const cache_time_in_seconds = 60 * 60 * 24; // seconds x minutes x hours
+  const cache_time_in_seconds = 86400; // 60 seconds x 60 minutes x 24 hours
   const cache_location        = './cache/';
   const user_agent            = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36';
 
@@ -46,7 +46,7 @@ class TwenteMilieu {
   public function getEvents($from_date) {
     // Do requests for the coming three months
     $events = array();
-    for( $i = 0; $i < 1; $i++ ) {
+    for( $i = 0; $i < 3; $i++ ) {
       $from_date->setDate($from_date->format('Y'), $from_date->format('m') + $i, 1);
       $events = array_merge(
         $events,
