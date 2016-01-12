@@ -2,7 +2,7 @@
 
 class TwenteMilieu {
 
-  const cache_time_in_seconds = 120;
+  const cache_time_in_seconds = 60 * 60 * 24; // seconds x minutes x hours
   const cache_location        = './cache/';
   const user_agent            = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36';
 
@@ -12,6 +12,7 @@ class TwenteMilieu {
   public function __construct($unsafe_postcode, $unsafe_huisnummer) {
     $this->postcode   = $this->safePostcode($unsafe_postcode);
     $this->huisnummer = $this->safeHuisnummer($unsafe_huisnummer);
+
     $this->cookies    = tempnam('/tmp','cookie');
     $this->logged_in  = false;
   }
@@ -71,18 +72,35 @@ class TwenteMilieu {
   }
 
   private function requestPage($request_date) {
-    if ( !$this->logged_in ) {
-      $this->login();
-    }
 
-    $c = curl_init('https://afvalkalender.twentemilieu.nl/maand?m='.$request_date->format('U'));
-    curl_setopt($c, CURLOPT_VERBOSE, 1);
-    curl_setopt($c, CURLOPT_COOKIEFILE, $this->cookies);
-    curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($c, CURLOPT_USERAGENT, self::user_agent);
-    curl_setopt($c, CURLOPT_REFERER, 'https://afvalkalender.twentemilieu.nl/');
-    $result = curl_exec($c);
-    curl_close($c);
+    $cache_filename  = self::cache_location;
+    $cache_filename .= $this->safePostcode() . $this->safeHuisnummer();
+    $cache_filename .= $request_date->format('U') . '.html';
+
+    $filemtime = @filemtime($cache_filename);
+
+    if (!$filemtime or (time() - $filemtime >= self::cache_time_in_seconds)) {
+
+      if ( !$this->logged_in ) {
+        $this->login();
+      }
+
+      $c = curl_init('https://afvalkalender.twentemilieu.nl/maand?m='.$request_date->format('U'));
+      curl_setopt($c, CURLOPT_VERBOSE, 1);
+      curl_setopt($c, CURLOPT_COOKIEFILE, $this->cookies);
+      curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
+      curl_setopt($c, CURLOPT_USERAGENT, self::user_agent);
+      curl_setopt($c, CURLOPT_REFERER, 'https://afvalkalender.twentemilieu.nl/');
+      $result = curl_exec($c);
+      curl_close($c);
+
+      if ( file_put_contents($cache_filename, $result) === false ) {
+        throw new Exception("Zorg ervoor dat de cache schrijfbaar is!");
+      }
+
+    } else {
+      $result = file_get_contents($cache_filename);
+    }
 
     return $result;
   }
