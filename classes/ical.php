@@ -32,6 +32,9 @@ class iCal {
 BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//{$this->organisation}/{$this->calendarname}//NONSGML v1.0//EN
+X-WR-CALNAME:Afvalkalender Twentemilieu
+X-WR-TIMEZONE:Europe/Amsterdam
+X-WR-CALDESC:Kalender feed van Timendus
 
 EOT;
   }
@@ -52,7 +55,6 @@ EOT;
   function footer() {
     return <<<EOT
 END:VCALENDAR
-
 EOT;
   }
 
