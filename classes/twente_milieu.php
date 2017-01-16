@@ -97,7 +97,7 @@ class TwenteMilieu {
       case 10:
         return "Verpakkingen worden opgehaald";
       default:
-        return "Onbekend verpakkingstype wordt opgehaald";
+        return "Onbekend afvaltype wordt opgehaald";
     }
   }
 
