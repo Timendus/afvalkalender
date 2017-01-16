@@ -40,7 +40,8 @@ class TwenteMilieu {
 
   public function getEvents($from_date) {
     // Do requests for the coming three months
-    $to_date = new DateTime($from_date->format('Y'), $from_date->format('m') + 2, 1);
+    $to_date = new DateTime();
+    $to_date->setDate($from_date->format('Y'), $from_date->format('m') + 3, 1);
     return $this->getCalendar($from_date, $to_date);
   }
 
@@ -77,7 +78,7 @@ class TwenteMilieu {
       foreach( $trash_type->pickupDates as $date ) {
         $events[] = array(
           'date'    => new DateTime($date),
-          'summary' => $self->getTrashSummary($trash_type->pickupType)
+          'summary' => $this->getTrashSummary($trash_type->pickupType)
         );
       }
     }
