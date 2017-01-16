@@ -5,16 +5,11 @@ class TwenteMilieu {
   const cache_time_in_seconds = 86400; // 60 seconds x 60 minutes x 24 hours
   const cache_location        = './cache/';
   const user_agent            = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36';
-
-  private $cookies;
-  private $logged_in;
+  const company_code          = '8d97bb56-5afd-4cbc-a651-b4f7314264b4';
 
   public function __construct($unsafe_postcode, $unsafe_huisnummer) {
     $this->postcode   = $this->safePostcode($unsafe_postcode);
     $this->huisnummer = $this->safeHuisnummer($unsafe_huisnummer);
-
-    $this->cookies    = tempnam('/tmp','cookie');
-    $this->logged_in  = false;
   }
 
   public function safePostcode($unsafe_postcode = null) {
@@ -45,95 +40,64 @@ class TwenteMilieu {
 
   public function getEvents($from_date) {
     // Do requests for the coming three months
-    $start_month = $from_date->format('m');
-    $events = array();
-    for( $i = 0; $i < 3; $i++ ) {
-      $from_date->setDate($from_date->format('Y'), $start_month + $i, 1);
-      $events = array_merge(
-        $events,
-        $this->parsePage($this->requestPage($from_date), $from_date)
-      );
-    }
-
-    return $events;
+    $to_date = new DateTime($from_date->format('Y'), $from_date->format('m') + 2, 1);
+    return $this->getCalendar($from_date, $to_date);
   }
 
-  private function login() {
-    $c = curl_init('https://afvalkalender.twentemilieu.nl/Afvalkalender/login.php');
+  private function getAddressUniqueId() {
+    $c = curl_init('https://wasteapi.2go-mobile.com/api/FetchAdress');
+    curl_setopt($c, CURLOPT_POST, true);
     curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($c, CURLOPT_COOKIEJAR, $this->cookies);
     curl_setopt($c, CURLOPT_VERBOSE, 1);
     curl_setopt($c, CURLOPT_USERAGENT, self::user_agent);
-    curl_setopt($c, CURLOPT_REFERER, 'https://afvalkalender.twentemilieu.nl/');
-    curl_setopt($c, CURLOPT_POSTFIELDS, 'postcode='.$this->safePostcode().'&huisnummer='.$this->safeHuisnummer());
-    curl_exec($c);
+    curl_setopt($c, CURLOPT_REFERER, 'https://www.twentemilieu.nl/enschede');
+    curl_setopt($c, CURLOPT_POSTFIELDS, 'companyCode='.self::company_code.'&postCode='.$this->safePostcode().'&houseNumber='.$this->safeHuisnummer());
+    $result = curl_exec($c);
     curl_close($c);
-    // Postcode and huisnummer are now in the session
-    $this->logged_in = true;
+
+    $json = json_decode($result);
+    return $json->dataList[0]->UniqueId;
   }
 
-  private function requestPage($request_date) {
+  private function getCalendar($from_date, $to_date) {
+    $c = curl_init('https://wasteapi.2go-mobile.com/api/GetCalendar');
+    curl_setopt($c, CURLOPT_POST, true);
+    curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($c, CURLOPT_VERBOSE, 1);
+    curl_setopt($c, CURLOPT_USERAGENT, self::user_agent);
+    curl_setopt($c, CURLOPT_REFERER, 'https://www.twentemilieu.nl/enschede');
+    curl_setopt($c, CURLOPT_POSTFIELDS, 'companyCode='.self::company_code.'&uniqueAddressID='.$this->getAddressUniqueId().'&startDate='.$from_date->format('Y-m-d').'&endDate='.$to_date->format('Y-m-d'));
+    $result = curl_exec($c);
+    curl_close($c);
 
-    $cache_filename  = self::cache_location;
-    $cache_filename .= $this->safePostcode() . $this->safeHuisnummer();
-    $cache_filename .= $request_date->format('U') . '.html';
-
-    $filemtime = @filemtime($cache_filename);
-
-    if (!$filemtime or (time() - $filemtime >= self::cache_time_in_seconds)) {
-
-      if ( !$this->logged_in ) {
-        $this->login();
-      }
-
-      $c = curl_init('https://afvalkalender.twentemilieu.nl/maand?m='.$request_date->format('U'));
-      curl_setopt($c, CURLOPT_VERBOSE, 1);
-      curl_setopt($c, CURLOPT_COOKIEFILE, $this->cookies);
-      curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
-      curl_setopt($c, CURLOPT_USERAGENT, self::user_agent);
-      curl_setopt($c, CURLOPT_REFERER, 'https://afvalkalender.twentemilieu.nl/');
-      $result = curl_exec($c);
-      curl_close($c);
-
-      if ( file_put_contents($cache_filename, $result) === false ) {
-        throw new Exception("Zorg ervoor dat de cache schrijfbaar is!");
-      }
-
-    } else {
-      $result = file_get_contents($cache_filename);
-    }
-
-    return $result;
-  }
-
-  private function parsePage($page, $request_date) {
-    $DOM = new DOMDocument;
-    $DOM->loadHTML($page);
-    $xpath = new DOMXpath($DOM);
-
-    // Find all images in .kalendar
-    $elements = $xpath->query("//*[contains(concat(' ', @class, ' '), ' kalender ')]//img");
-
+    $json = json_decode($result);
     $events = array();
-    foreach( $elements as $image ) {
-      // Is it in this month?
-      if ( !in_array('inactive', explode(' ',$image->parentNode->getAttribute('class')) ) ) {
-        // If so, add it to the events array
-        $day  = $image->parentNode->firstChild->nodeValue;
-        $day  = filter_var($day, FILTER_SANITIZE_NUMBER_INT);
-        $date = new DateTime();
-        $date->setDate($request_date->format('Y'), $request_date->format('m'), $day);
-        $date->setTime(0,0,0);
-        $date->setTimezone(new DateTimeZone('Europe/Amsterdam'));
 
+    foreach( $json->dataList as $trash_type ) {
+      foreach( $trash_type->pickupDates as $date ) {
         $events[] = array(
-          'date'    => $date,
-          'summary' => $image->getAttribute('alt')
+          'date'    => new DateTime($date),
+          'summary' => $self->getTrashSummary($trash_type->pickupType)
         );
       }
     }
 
     return $events;
+  }
+
+  private function getTrashSummary($type) {
+    switch($type) {
+      case 0:
+        return "Restafval wordt opgehaald";
+      case 1:
+        return "GFT wordt opgehaald";
+      case 2:
+        return "Oud papier wordt opgehaald";
+      case 10:
+        return "Verpakkingen worden opgehaald";
+      default:
+        return "Onbekend verpakkingstype wordt opgehaald";
+    }
   }
 
 }
