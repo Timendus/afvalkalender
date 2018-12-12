@@ -78,7 +78,7 @@ class TwenteMilieu {
       foreach( $trash_type->pickupDates as $date ) {
         $events[] = array(
           'date'    => new DateTime($date),
-          'summary' => $this->getTrashSummary($trash_type->pickupType)
+          'summary' => $this->getTrashSummary($trash_type->_pickupTypeText)
         );
       }
     }
@@ -88,13 +88,13 @@ class TwenteMilieu {
 
   private function getTrashSummary($type) {
     switch($type) {
-      case 0:
+      case "GREY":
         return "Restafval wordt opgehaald";
-      case 1:
+      case "GREEN":
         return "GFT wordt opgehaald";
-      case 2:
-        return "Oud papier wordt opgehaald";
-      case 10:
+      case "PAPER":
+        return "Papier wordt opgehaald";
+      case "PACKAGES":
         return "Verpakkingen worden opgehaald";
       default:
         return "Onbekend afvaltype wordt opgehaald";
