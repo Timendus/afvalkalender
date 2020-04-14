@@ -52,8 +52,8 @@ class TwenteMilieu {
     curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($c, CURLOPT_VERBOSE, 1);
     curl_setopt($c, CURLOPT_USERAGENT, self::user_agent);
-    curl_setopt($c, CURLOPT_REFERER, 'https://www.twentemilieu.nl/enschede');
-    curl_setopt($c, CURLOPT_POSTFIELDS, 'companyCode='.self::company_code.'&postCode='.$this->safePostcode().'&houseNumber='.$this->safeHuisnummer());
+    curl_setopt($c, CURLOPT_REFERER, 'https://www.twentemilieu.nl/afval/afval-in-mijn-gemeente?registratie=ja');
+    curl_setopt($c, CURLOPT_POSTFIELDS, 'companyCode='.self::company_code.'&postCode='.$this->safePostcode().'&houseNumber='.$this->safeHuisnummer().'&houseLetter=');
     $result = curl_exec($c);
     curl_close($c);
 
@@ -67,7 +67,7 @@ class TwenteMilieu {
     curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($c, CURLOPT_VERBOSE, 1);
     curl_setopt($c, CURLOPT_USERAGENT, self::user_agent);
-    curl_setopt($c, CURLOPT_REFERER, 'https://www.twentemilieu.nl/enschede');
+    curl_setopt($c, CURLOPT_REFERER, 'https://www.twentemilieu.nl/enschede/afval/afvalkalender');
     curl_setopt($c, CURLOPT_POSTFIELDS, 'companyCode='.self::company_code.'&uniqueAddressID='.$this->getAddressUniqueId().'&startDate='.$from_date->format('Y-m-d').'&endDate='.$to_date->format('Y-m-d'));
     $result = curl_exec($c);
     curl_close($c);
