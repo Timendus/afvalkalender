@@ -6,6 +6,7 @@ class TwenteMilieu {
   const cache_location        = './cache/';
   const user_agent            = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36';
   const company_code          = '8d97bb56-5afd-4cbc-a651-b4f7314264b4';
+  const api_domain            = 'https://twentemilieuapi.ximmio.com/api';
 
   public function __construct($unsafe_postcode, $unsafe_huisnummer) {
     $this->postcode   = $this->safePostcode($unsafe_postcode);
@@ -46,7 +47,7 @@ class TwenteMilieu {
   }
 
   private function getAddressUniqueId() {
-    $c = curl_init('https://wasteapi.2go-mobile.com/api/FetchAdress');
+    $c = curl_init(self::api_domain.'/FetchAdress');
     curl_setopt($c, CURLOPT_POST, true);
     curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($c, CURLOPT_VERBOSE, 1);
@@ -61,7 +62,7 @@ class TwenteMilieu {
   }
 
   private function getCalendar($from_date, $to_date) {
-    $c = curl_init('https://wasteapi.2go-mobile.com/api/GetCalendar');
+    $c = curl_init(self::api_domain.'/GetCalendar');
     curl_setopt($c, CURLOPT_POST, true);
     curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($c, CURLOPT_VERBOSE, 1);
