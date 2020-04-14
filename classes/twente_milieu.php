@@ -20,7 +20,7 @@ class TwenteMilieu {
 
     $unsafe_postcode = preg_replace('/\s+/', '', $unsafe_postcode);
     if ( preg_match("/^[0-9]{4}[A-Z]{2}$/i", $unsafe_postcode) ) {
-      return $unsafe_postcode;
+      return strtoupper($unsafe_postcode);
     } else {
       throw new Exception("Ongeldige postcode");
     }
