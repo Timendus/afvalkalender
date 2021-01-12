@@ -97,8 +97,10 @@ class TwenteMilieu {
         return "Papier wordt opgehaald";
       case "PACKAGES":
         return "Verpakkingen worden opgehaald";
+      case "TREE":
+        return "Kerstbomen worden opgehaald";
       default:
-        return "Onbekend afvaltype wordt opgehaald";
+        return "Onbekend afvaltype wordt opgehaald: '" . $type . "'";
     }
   }
 
