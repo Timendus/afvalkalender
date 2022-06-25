@@ -36,7 +36,7 @@ Nodig:
 
 Grofweg dit dus:
 ```bash
-$ sudo apt-get install git apache2 libapache2-mod-php5 php5-curl
+sudo apt-get install git apache2 libapache2-mod-php php-curl
 ```
 
 En dan:
