@@ -41,9 +41,13 @@ $ sudo apt-get install git apache2 libapache2-mod-php5 php5-curl
 
 En dan:
 ```bash
-$ cd /var/www
-$ git clone git@github.com:Timendus/afvalkalender.git
-$ chmod 777 afvalkalender/cache
+tmpdir=$(mktemp -d)
+cd $tmpdir
+git clone https://github.com/Timendus/afvalkalender.git
+sudo mv afvalkalender /var/www
+cd /var/www/afvalkalender
+sudo chown -R root:root .
+sudo chown -R www-data:www-data cache
 ```
 
 ## Contact
