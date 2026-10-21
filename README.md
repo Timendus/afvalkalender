@@ -65,8 +65,7 @@ De cache wordt per postcode en huisnummer bijgehouden en dagelijks ververst.
 ### NixOS
 
 Hieronder staat een volledige module die je bijvoorbeeld vanuit je
-`configuration.nix` kunt importeren. Pas het lokale pad aan als je de
-repository ergens anders hebt uitgecheckt.
+`configuration.nix` kunt importeren.
 
 ```nix
 { ... }:
