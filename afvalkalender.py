@@ -7,8 +7,8 @@ import argparse
 import hashlib
 import html
 import json
+import logging
 import re
-import sys
 from datetime import date, datetime
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -16,6 +16,9 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, urlencode, urlparse
 from urllib.request import Request, urlopen
+
+
+logger = logging.getLogger(__name__)
 
 
 class ValidationError(ValueError):
@@ -118,10 +121,12 @@ def cached_events(cache_dir: Path, twente_milieu: TwenteMilieu) -> list[tuple[da
     try:
         cached = json.loads(cache_file.read_text())
         if cached["date"] == date.today().isoformat():
+            logger.info("Calendar cache hit")
             return [(date.fromisoformat(event_date), summary) for event_date, summary in cached["events"]]
     except (FileNotFoundError, KeyError, TypeError, ValueError, json.JSONDecodeError):
         pass
 
+    logger.info("Calendar cache miss")
     events = twente_milieu.get_events()
     cache_dir.mkdir(parents=True, exist_ok=True)
     cache_file.write_text(
@@ -232,7 +237,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(encoded)
 
     def log_message(self, format: str, *args: object) -> None:
-        print(format % args, file=sys.stderr)
+        logger.info(format, *args)
 
 
 def main() -> None:
@@ -241,6 +246,7 @@ def main() -> None:
     parser.add_argument("--port", type=int, default=8091)
     parser.add_argument("--cache-dir", type=Path, default=Path("./cache"))
     args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     server.cache_dir = args.cache_dir
     server.serve_forever()
