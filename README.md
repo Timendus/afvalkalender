@@ -15,20 +15,31 @@ mij toch een beetje alsof men ons vooral richting de mobiele app wil pushen. Mis
 verzamelen van nauwkeurigere statistieken over gebruikers... wie zal het zeggen.
 
 Anyway, we hebben nu dus nog drie opties:
- * De mobiele app van Twente Milieu installeren
- * Een PDF downloaden en op een dode boom printen voor op de koelkast
- * Elke dag naar de website gaan
+
+- De mobiele app van Twente Milieu installeren
+- Een PDF downloaden en op een dode boom printen voor op de koelkast
+- Elke dag naar de website gaan
 
 Ik heb gekozen voor optie nummer drie. Maar dan wel geautomatiseerd. En met een iCal feed ;)
 
 ## Features
 
- * Genereer een URL om aan je digitale agenda toe te voegen (dus geen download)
- * De kalender wordt dagelijks ververst, en daarna gecached zodat we Twente Milieu niet platspammen
- * Wijzigingen en verwijderingen in de agenda worden netjes overgenomen dmv `UIDs` zonder menselijke interventie
- * Ophaaldata worden ~drie maanden vooruit getoond
- * Stand-alone Python-code, uitsluitend met de standaardbibliotheek
- * Een NixOS-module voor een kleine, afgeschermde systemd-service
+- Genereer een URL om aan je digitale agenda toe te voegen (dus geen download)
+- De kalender wordt dagelijks ververst, en daarna gecached zodat we Twente Milieu niet platspammen
+- Wijzigingen en verwijderingen in de agenda worden netjes overgenomen dmv `UIDs` zonder menselijke interventie
+- Ophaaldata worden ~drie maanden vooruit getoond
+- Stand-alone Python-code, uitsluitend met de standaardbibliotheek
+- Een NixOS-module voor een kleine, afgeschermde systemd-service
+
+## AI waarschuwing
+
+Ik heb dit project in 2016 geschreven in PHP. De oorspronkelijke
+PHP-implementatie is nog beschikbaar op de
+[`php-legacy`](https://github.com/Timendus/afvalkalender/tree/php-legacy)
+branch. De versie in `master` is een conversie naar Python3, gedaan door Codex,
+omdat ik af wilde van de laatste stukjes PHP op mijn server. Ik heb de code
+gereviewed en getest, maar het blijft een AI feestje. Als dat niet je ding is
+dan moet je deze service niet draaien, of de oude PHP versie gebruiken.
 
 ## Installatie
 
@@ -59,16 +70,12 @@ De module draait de service met een tijdelijke systemd-gebruiker, een
 schrijfbare state directory voor de dagelijkse cache en een beperkt
 bestandssysteem. Er zijn geen Python-pakketten buiten de standaardbibliotheek.
 
-## Oude PHP-versie
-
-De oorspronkelijke PHP-implementatie blijft beschikbaar op de
-[`php-legacy`](https://github.com/Timendus/afvalkalender/tree/php-legacy)
-branch.
-
 ## Contact
 
 ### Feedback / lof / kritiek?
+
 mail@timendus.com
 
 ### Verbeteringen?
+
 Ik zie de pull request wel verschijnen ;)
