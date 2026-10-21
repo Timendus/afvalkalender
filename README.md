@@ -28,7 +28,7 @@ Ik heb gekozen voor optie nummer drie. Maar dan wel geautomatiseerd. En met een 
 - De kalender wordt dagelijks ververst, en daarna gecached zodat we Twente Milieu niet platspammen
 - Wijzigingen en verwijderingen in de agenda worden netjes overgenomen dmv `UIDs` zonder menselijke interventie
 - Ophaaldata worden ~drie maanden vooruit getoond
-- Stand-alone Python-code, uitsluitend met de standaardbibliotheek
+- Stand-alone Python-code, uitsluitend met de standard library
 - Een NixOS-module voor een kleine, afgeschermde systemd-service
 
 ## AI waarschuwing
@@ -49,26 +49,45 @@ dan moet je deze service niet draaien, of de oude PHP versie gebruiken.
 python3 afvalkalender.py
 ```
 
-De service luistert standaard alleen op `127.0.0.1:8091`. Het formulier is
-beschikbaar op `/` en de agenda-feed op
-`/ical?postcode=1234AB&huisnummer=123`.
+De service luistert standaard op `127.0.0.1:8091`.
+
+Gebruik `--host`, `--port` en `--cache-dir` om dat lokaal aan te passen:
+
+```bash
+python3 afvalkalender.py \
+  --host 0.0.0.0 \
+  --port 8080 \
+  --cache-dir ./cache
+```
+
+De cache wordt per postcode en huisnummer bijgehouden en dagelijks ververst.
 
 ### NixOS
 
-Importeer `nixos-module.nix` en laat je reverse proxy de gewenste URL naar de
-lokale service sturen:
+Hieronder staat een volledige module die je bijvoorbeeld vanuit je
+`configuration.nix` kunt importeren. Pas het lokale pad aan als je de
+repository ergens anders hebt uitgecheckt.
 
 ```nix
-services.afvalkalender = {
-  enable = true;
-  listenAddress = "127.0.0.1";
-  port = 8091;
+{ ... }:
+
+{
+  imports = [
+    /where/ever/afvalkalender/nixos-module.nix
+  ];
+
+  services.afvalkalender = {
+    enable = true;
+    listenAddress = "127.0.0.1";
+    port = 8091;
+  };
 };
 ```
 
 De module draait de service met een tijdelijke systemd-gebruiker, een
 schrijfbare state directory voor de dagelijkse cache en een beperkt
-bestandssysteem. Er zijn geen Python-pakketten buiten de standaardbibliotheek.
+bestandssysteem. Er worden geen Python dependencies gebruikt behalve de standard
+library.
 
 ## Contact
 
