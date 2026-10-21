@@ -27,30 +27,43 @@ Ik heb gekozen voor optie nummer drie. Maar dan wel geautomatiseerd. En met een 
  * De kalender wordt dagelijks ververst, en daarna gecached zodat we Twente Milieu niet platspammen
  * Wijzigingen en verwijderingen in de agenda worden netjes overgenomen dmv `UIDs` zonder menselijke interventie
  * Ophaaldata worden ~drie maanden vooruit getoond
- * Stand-alone doodsimpele PHP code die nog draait op een schoenendoos
+ * Stand-alone Python-code, uitsluitend met de standaardbibliotheek
+ * Een NixOS-module voor een kleine, afgeschermde systemd-service
 
 ## Installatie
 
-Nodig:
- * Git
- * Webserver die PHP draait
- * libcurl
+### Lokaal draaien
 
-Grofweg dit dus:
 ```bash
-sudo apt-get install git apache2 libapache2-mod-php php-curl
+python3 afvalkalender.py
 ```
 
-En dan:
-```bash
-tmpdir=$(mktemp -d)
-cd $tmpdir
-git clone https://github.com/Timendus/afvalkalender.git
-sudo mv afvalkalender /var/www
-cd /var/www/afvalkalender
-sudo chown -R root:root .
-sudo chown -R www-data:www-data cache
+De service luistert standaard alleen op `127.0.0.1:8091`. Het formulier is
+beschikbaar op `/` en de agenda-feed op
+`/ical?postcode=1234AB&huisnummer=123`.
+
+### NixOS
+
+Importeer `nixos-module.nix` en laat je reverse proxy de gewenste URL naar de
+lokale service sturen:
+
+```nix
+services.afvalkalender = {
+  enable = true;
+  listenAddress = "127.0.0.1";
+  port = 8091;
+};
 ```
+
+De module draait de service met een tijdelijke systemd-gebruiker, een
+schrijfbare state directory voor de dagelijkse cache en een beperkt
+bestandssysteem. Er zijn geen Python-pakketten buiten de standaardbibliotheek.
+
+## Oude PHP-versie
+
+De oorspronkelijke PHP-implementatie blijft beschikbaar op de
+[`php-legacy`](https://github.com/Timendus/afvalkalender/tree/php-legacy)
+branch.
 
 ## Contact
 
