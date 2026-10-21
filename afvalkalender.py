@@ -178,7 +178,7 @@ class Handler(BaseHTTPRequestHandler):
         request = urlparse(self.path)
         if request.path in ("", "/"):
             self.render_form(parse_qs(request.query))
-        elif request.path == "/ical":
+        elif request.path in ("/ical", "/ical.php"):
             self.render_calendar(parse_qs(request.query))
         else:
             self.send_error(HTTPStatus.NOT_FOUND)
