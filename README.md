@@ -71,16 +71,22 @@ repository ergens anders hebt uitgecheckt.
 ```nix
 { ... }:
 
+let
+  afvalkalenderSrc = builtins.fetchGit {
+    url = "https://github.com/Timendus/afvalkalender.git";
+    rev = "<latest full git commit hash>";
+  };
+in
 {
-  imports = [
-    /where/ever/afvalkalender/nixos-module.nix
-  ];
+  imports = [ "${afvalkalenderSrc}/nixos-module.nix" ];
 
   services.afvalkalender = {
     enable = true;
     listenAddress = "127.0.0.1";
     port = 8091;
   };
+
+  # Expose/proxy the service any way you see fit
 };
 ```
 
