@@ -106,7 +106,7 @@ def events_for(postcode: str, house_number: str) -> list[tuple[date, str]]:
             f"Onbekend afvaltype wordt opgehaald: '{pickup_type.get('_pickupTypeText', '')}'",
         )
         for pickup_date in pickup_type.get("pickupDates", []):
-            events.append((date.fromisoformat(pickup_date), summary))
+            events.append((datetime.fromisoformat(pickup_date.replace("Z", "+00:00")).date(), summary))
     return sorted(events)
 
 
